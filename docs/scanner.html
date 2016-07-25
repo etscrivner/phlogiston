@@ -16,6 +16,109 @@ Subject to the terms of the MIT license, as written in the included
 <b>Authors:</b><br>
 Eric Scrivner<br><br>
 
+<dl><dt><big><a name="isNewline"></a>pure nothrow @nogc @safe bool <u>isNewline</u>(immutable dchar <i>c</i>);
+</big></dt>
+<dd>This predicate indicates whether or not the given character is a newline
+ character.
+<br><br>
+<b>Params:</b><br>
+<table><tr><td>dchar <i>c</i></td>
+<td>The character to test</td></tr>
+</table><br>
+<b>Returns:</b><br>
+<b>true</b> if the character is a newline, <b>false</b> otherwise.<br><br>
+<b>Examples:</b><br>
+<pre class="d_code">
+<font color=blue>assert</font>(<u>isNewline</u>('\n'));
+<font color=blue>assert</font>(!<u>isNewline</u>('a'));
+<font color=blue>assert</font>(!<u>isNewline</u>(' '));
+</pre>
+<br><br>
+</dd>
+<dt><big><a name="InvalidTokenException"></a>class <u>InvalidTokenException</u>: <u>object.Exception</u>;
+</big></dt>
+<dd>Exception raised when an invalid character is encountered in input range.<br><br>
+
+</dd>
+<dt><big><a name="Scanner"></a>class <u>Scanner</u>;
+</big></dt>
+<dd>Scans the input stream provided into a series of tokens.<br><br>
+<b>Examples:</b><br>
+<pre class="d_code">
+<font color=blue>auto</font> scanner = <font color=blue>new</font> <u>Scanner</u>(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>""</font>.representation);
+<font color=blue>assert</font>(<font color=blue>cast</font>(EndOfStream)scanner.nextToken());
+
+scanner = <font color=blue>new</font> <u>Scanner</u>(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"\n\n\r\n  "</font>.representation);
+<font color=blue>assert</font>(<font color=blue>cast</font>(Whitespace)scanner.nextToken());
+<font color=blue>assert</font>(scanner.lineNumber == 4);
+<font color=blue>assert</font>(scanner.columnNumber == 3);
+
+scanner = <font color=blue>new</font> <u>Scanner</u>(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"STOP"</font>.representation);
+StackOpcode stackToken = <font color=blue>cast</font>(StackOpcode)scanner.nextToken();
+<font color=blue>assert</font>(stackToken.m_opcode == <font color=red>"STOP"</font>);
+
+scanner = <font color=blue>new</font> <u>Scanner</u>(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH1 0xa"</font>.representation);
+PushOpcode pushToken = <font color=blue>cast</font>(PushOpcode)scanner.nextToken();
+<font color=blue>assert</font>(pushToken.m_opcode == <font color=red>"PUSH1"</font>);
+<font color=blue>assert</font>(<font color=blue>cast</font>(Whitespace)scanner.nextToken());
+Number number = <font color=blue>cast</font>(Number)scanner.nextToken();
+<font color=blue>assert</font>(number.m_value == BigInt(10));
+
+scanner = <font color=blue>new</font> <u>Scanner</u>(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH1 1234"</font>.representation);
+pushToken = <font color=blue>cast</font>(PushOpcode)scanner.nextToken();
+<font color=blue>assert</font>(pushToken.m_opcode == <font color=red>"PUSH1"</font>);
+<font color=blue>assert</font>(<font color=blue>cast</font>(Whitespace)scanner.nextToken());
+number = <font color=blue>cast</font>(Number)scanner.nextToken();
+<font color=blue>assert</font>(number.m_value == BigInt(<font color=red>"1234"</font>));
+</pre>
+<br><br>
+<dl><dt><big><a name="Scanner.lineNumber"></a>const @property size_t <u>lineNumber</u>();
+</big></dt>
+<dd><b>Returns:</b><br>
+The current line number.<br><br>
+<b>Examples:</b><br>
+<pre class="d_code">
+<font color=blue>auto</font> scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"\n\n\r\n"</font>.representation);
+<font color=blue>assert</font>(scanner.<u>lineNumber</u> == 1);
+</pre>
+<br><br>
+</dd>
+<dt><big><a name="Scanner.columnNumber"></a>const @property size_t <u>columnNumber</u>();
+</big></dt>
+<dd><b>Returns:</b><br>
+The current column number.<br><br>
+<b>Examples:</b><br>
+<pre class="d_code">
+<font color=blue>auto</font> scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"abcd "</font>.representation);
+<font color=blue>assert</font>(scanner.<u>columnNumber</u> == 1);
+</pre>
+<br><br>
+</dd>
+<dt><big><a name="Scanner.currentToken"></a>@property Token <u>currentToken</u>();
+</big></dt>
+<dd><b>Returns:</b><br>
+The most recent token from the input stream, or <b>null</b> if no
+ tokens have yet been retrieved.<br><br>
+<b>Examples:</b><br>
+<pre class="d_code">
+<font color=blue>ubyte</font>[] fixture = <font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH 1"</font>.representation;
+<font color=blue>auto</font> scanner = <font color=blue>new</font> Scanner(fixture);
+<font color=blue>assert</font>(scanner.<u>currentToken</u> <font color=blue>is</font> <font color=blue>null</font>);
+</pre>
+<br><br>
+</dd>
+<dt><big><a name="Scanner.nextToken"></a>Token <u>nextToken</u>();
+</big></dt>
+<dd>This routine consumes the input stream, returning the next token found.
+ If a token could not be found, then an error is raised.
+<br><br>
+<b>Returns:</b><br>
+Next token in the input character stream.<br><br>
+
+</dd>
+</dl>
+</dd>
+</dl>
 
         <hr><small>Page generated by <a href="http://dlang.org/ddoc.html">Ddoc</a>. </small>
         </body></html>

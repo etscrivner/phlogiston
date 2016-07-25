@@ -12,7 +12,7 @@ following:
 $ dub build
 ```
 
-## Example
+## Assembler Usage
 
 The following is a simple contract:
 

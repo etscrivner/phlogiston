@@ -30,13 +30,15 @@ int main(string[] args) {
     Parser parser = new Parser;
     ubyte[] byteChars = cast(ubyte[])vmBytes.representation;
     Scanner scanner = new Scanner(byteChars);
-
     auto bytecode = parser.parse(scanner);
+
+    File file = File(outputFile, "w");
     foreach (val; bytecode) {
-        writef("%02x", val);
+        file.writef("%02x", val);
     }
     
-    write('\n');
+    file.write('\n');
+    file.close();
 
     return 0;
 }

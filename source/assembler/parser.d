@@ -12,6 +12,7 @@ module phlogiston.assembler.parser;
 import std.algorithm;
 import std.bigint;
 import std.conv;
+import std.exception;
 import std.range;
 import std.stdio;
 import std.string;

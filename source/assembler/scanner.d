@@ -11,10 +11,12 @@ module phlogiston.assembler.scanner;
 
 import std.ascii;
 import std.bigint;
+import std.exception;
 import std.range;
 import std.string;
 
 import phlogiston.assembler.token;
+import phlogiston.evm.opcodes;
 
 /**
  * This predicate indicates whether or not the given character is a newline
@@ -57,12 +59,15 @@ class Scanner {
     private size_t m_columnNumber;
     /// The current token from the input range.
     private Token m_currentToken;
+    /// Associative array of opcode names to bytecode values
+    private ubyte[string] m_validOpcodeNames;
 
     this(ubyte[] charStream) {
         this.m_charStream = charStream;
         this.m_lineNumber = 1;
         this.m_columnNumber = 1;
         this.m_currentToken = null;
+        this.m_validOpcodeNames = generateOpcodeNameToBytecodeMap();
     }
 
     /**
@@ -156,7 +161,7 @@ class Scanner {
      * Returns: The token for the parsed number.
      */
     private Token parseNumber() {
-        if (m_charStream[0..2] == "0x") {
+        if (m_charStream.length >= 3 && m_charStream[0..2] == "0x") {
             return parseHexNumber();
         }
 
@@ -230,6 +235,15 @@ class Scanner {
             m_charStream.popFront();
         }
 
+        // Ensure the opcode is a valid push opcode
+        if (cast(string)opcode !in m_validOpcodeNames) {
+            throw new InvalidTokenException(
+                format("Expected opcode, found '%s' (Line %d, Column %d)",
+                       opcode,
+                       columnNumber,
+                       lineNumber));
+        }
+
         return new PushOpcode(opcode.assumeUTF);
     }
 
@@ -247,6 +261,15 @@ class Scanner {
 
             m_columnNumber += 1;
             m_charStream.popFront();
+        }
+
+        // Ensure the opcode is a valid stack opcode
+        if (cast(string)opcode !in m_validOpcodeNames) {
+            throw new InvalidTokenException(
+                format("Expected opcode, found '%s' (Line %d, Column %d)",
+                       opcode,
+                       columnNumber,
+                       lineNumber));
         }
 
         return new StackOpcode(opcode.assumeUTF);
@@ -280,4 +303,17 @@ unittest {
     assert(cast(Whitespace)scanner.nextToken());
     number = cast(Number)scanner.nextToken();
     assert(number.m_value == BigInt("1234"));
+}
+
+unittest {
+    // Invalid hex number
+    auto scanner = new Scanner(cast(ubyte[])"PUSH1 0x".representation);
+    scanner.nextToken();
+    scanner.nextToken();
+    scanner.nextToken();
+    assertThrown!InvalidTokenException(scanner.nextToken());
+
+    // Invalid push opcode
+    scanner = new Scanner(cast(ubyte[])"PUSH36 0xa".representation);
+    assertThrown!InvalidTokenException(scanner.nextToken());
 }

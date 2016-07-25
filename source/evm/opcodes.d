@@ -154,8 +154,19 @@ enum Opcode : ubyte {
 }
 
 /**
- * Generate an associative array from opcode names to bytecode values.
- *
+ * Returns: An associative array from bytecode values to opcode names.
+ */
+pure string[ubyte] generateBytecodeToOpcodeNameMap() {
+    string[ubyte] results;
+
+    foreach (immutable opcode; [EnumMembers!Opcode]) {
+        results[opcode] = std.conv.to!string(opcode);
+    }
+
+    return results;
+}
+
+/**
  * Returns: An associative array from opcode names to bytecode values.
  */
 pure ubyte[string] generateOpcodeNameToBytecodeMap() {

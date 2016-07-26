@@ -69,24 +69,22 @@ class Parser {
                 size_t expectedNumBytes = (pushBytecode - Opcode.PUSH1 + 1);
 
                 // Add argument to bytecode stream
-                auto encodedNumber = encodeNumber(
-                    cast(Number)scanner.currentToken,
-                    expectedNumBytes);
+                Number argumentToken = cast(Number)scanner.currentToken;
+                auto pushArgumentBytes = encodeNumberAsBytes(
+                    argumentToken, expectedNumBytes);
 
-                if (encodedNumber.length > expectedNumBytes) {
+                if (pushArgumentBytes.length > expectedNumBytes) {
                     throw new ParseError(
                         format("Number 0x%x is too big for opcode PUSH%d" ~
                                " (Line %d, Column %d)",
-                               (cast(Number)scanner.currentToken).m_value,
+                               argumentToken.m_value,
                                expectedNumBytes,
                                scanner.lineNumber,
                                scanner.columnNumber));
                 }
 
-                foreach(value; encodedNumber)
-                {
-                    bytecodeProgram ~= value;
-                }
+                pushArgumentBytes.each!(
+                    (argByte) => bytecodeProgram ~= argByte);
             }
 
             currentToken = scanner.nextToken();
@@ -117,11 +115,15 @@ class Parser {
      *
      * Returns: byte range containing big-endian encoding of number.
      */
-    private ubyte[] encodeNumber(Number number, size_t expectedNumBytes) {
+    private ubyte[] encodeNumberAsBytes(Number number,
+                                        size_t expectedNumBytes) {
         ubyte[] result;
 
+        // Convert to hex, remove underscores, and create range of two
+        // character chunks.
         auto reverseHexBytes = chunks(
             number.m_value.toHex().replace("_", ""), 2);
+
         foreach (nextByte; reverseHexBytes) {
             dchar[] byteChars = nextByte.array();
             result ~= std.conv.parse!ubyte(byteChars, 16);
@@ -133,13 +135,34 @@ class Parser {
 
 ///
 unittest {
+    // Simple single opcode
     auto scanner = new Scanner(cast(ubyte[])"ADD");
     auto parser = new Parser();
     auto bytecode = parser.parse(scanner);
-
     assert(bytecode == [0x01]);
 
+    // Multiple opcodes
     scanner = new Scanner(cast(ubyte[])"PUSH1 0xfa\nPUSH1 0xab");
     bytecode = parser.parse(scanner);
-    assert(bytecode == [0x60, 0xfa, 0x60, 0xab]);
+    assert(bytecode == [Opcode.PUSH1, 0xfa, Opcode.PUSH1, 0xab]);
+
+    // Mixed stack and push opcodes
+    scanner = new Scanner(cast(ubyte[])"PUSH1 0xfa\nDUP1\nMUL\nPUSH1 0x60\n");
+    bytecode = parser.parse(scanner);
+    assert(bytecode == [Opcode.PUSH1, 0xfa,
+                        Opcode.DUP1,
+                        Opcode.MUL,
+                        Opcode.PUSH1, 0x60]);
+
+    // Properly ignores all sorts of whitespace
+    scanner = new Scanner(cast(ubyte[])"  \r\nPUSH1\t0xfa\r\nDUP1\n\r\t    ");
+    bytecode = parser.parse(scanner);
+    assert(bytecode == [Opcode.PUSH1, 0xfa, Opcode.DUP1]);
+}
+
+unittest {
+    // Number is too big for opcode
+    auto scanner = new Scanner(cast(ubyte[])"PUSH2 0xabcdef");
+    auto parser = new Parser();
+    assertThrown!ParseError(parser.parse(scanner));
 }

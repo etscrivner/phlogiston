@@ -11,6 +11,7 @@ module phlogiston.assembler.scanner;
 
 import std.ascii;
 import std.bigint;
+import std.conv;
 import std.exception;
 import std.range;
 import std.string;
@@ -130,7 +131,7 @@ class Scanner {
         } else {
             throw new InvalidTokenException(
                 format("Invalid token '%c' (Line %d, Column %d)",
-                       m_charStream.front,
+                       cast(dchar)m_charStream.front,
                        m_lineNumber,
                        m_columnNumber));
         }
@@ -156,7 +157,7 @@ class Scanner {
     }
 
     /**
-     * This routin parses a hexadecimal number from the input range.
+     * This routine parses a hexadecimal number from the input range.
      *
      * Returns: The token for the parsed number.
      */
@@ -184,7 +185,15 @@ class Scanner {
             m_charStream.popFront();
         }
 
-        return new Number(BigInt(hexNumber.assumeUTF));
+        try {
+            return new Number(BigInt(hexNumber.assumeUTF));
+        } catch(ConvException ce) {
+            throw new InvalidTokenException(
+                format("Invalid hexadecimal number '%s' (Line %d, Column %d)",
+                       cast(string)hexNumber,
+                       lineNumber,
+                       columnNumber));
+        }
     }
 
     /**
@@ -238,8 +247,8 @@ class Scanner {
         // Ensure the opcode is a valid push opcode
         if (cast(string)opcode !in m_validOpcodeNames) {
             throw new InvalidTokenException(
-                format("Expected opcode, found '%s' (Line %d, Column %d)",
-                       opcode,
+                format("Expected valid opcode, found '%s' (Line %d, Column %d)",
+                       cast(string)opcode,
                        columnNumber,
                        lineNumber));
         }
@@ -266,8 +275,8 @@ class Scanner {
         // Ensure the opcode is a valid stack opcode
         if (cast(string)opcode !in m_validOpcodeNames) {
             throw new InvalidTokenException(
-                format("Expected opcode, found '%s' (Line %d, Column %d)",
-                       opcode,
+                format("Expected valid opcode, found '%s' (Line %d, Column %d)",
+                       cast(string)opcode,
                        columnNumber,
                        lineNumber));
         }
@@ -307,13 +316,17 @@ unittest {
 
 unittest {
     // Invalid hex number
-    auto scanner = new Scanner(cast(ubyte[])"PUSH1 0x".representation);
-    scanner.nextToken();
+    auto scanner = new Scanner(cast(ubyte[])"PUSH1 0x\nDUP1".representation);
     scanner.nextToken();
     scanner.nextToken();
     assertThrown!InvalidTokenException(scanner.nextToken());
 
     // Invalid push opcode
     scanner = new Scanner(cast(ubyte[])"PUSH36 0xa".representation);
+    assertThrown!InvalidTokenException(scanner.nextToken());
+
+    // Invalid charactr in stream
+    scanner = new Scanner(cast(ubyte[])"PUSH1-0xfa".representation);
+    scanner.nextToken();
     assertThrown!InvalidTokenException(scanner.nextToken());
 }

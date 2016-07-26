@@ -31,9 +31,17 @@ class AssemblerApp {
 
         Scanner scanner = new Scanner(assemblyCodeBytes);
         Parser parser = new Parser;
-        ubyte[] bytecode = parser.parse(scanner);
 
-        writeBytecodeToFile(bytecode, outputFile);
+        try {
+            ubyte[] bytecode = parser.parse(scanner);
+            writeBytecodeToFile(bytecode, outputFile);
+        } catch(InvalidTokenException ite) {
+            writeln("scanner: error: ", ite.msg);
+            return;
+        } catch(ParseError pe) {
+            writeln("parser: error: ", pe.msg);
+            return;
+        }
     }
 
     /**

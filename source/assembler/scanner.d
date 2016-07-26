@@ -277,8 +277,8 @@ class Scanner {
             throw new InvalidTokenException(
                 format("Expected valid opcode, found '%s' (Line %d, Column %d)",
                        cast(string)opcode,
-                       columnNumber,
-                       lineNumber));
+                       lineNumber,
+                       columnNumber));
         }
 
         return new StackOpcode(opcode.assumeUTF);

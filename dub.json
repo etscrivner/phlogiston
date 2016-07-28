@@ -15,7 +15,10 @@
             "description": "Library for assembling / disassembling EVM code.",
             "targetType": "library",
             "sourcePaths": [
-                "source/assembler", "source/disassember", "source/evm"
+                "source/assembler", "source/disassembler", "source/evm"
+            ],
+            "importPaths": [
+                "source/assembler", "source/disassembler", "source/evm"
             ]
         }
     ]

@@ -11,7 +11,13 @@ To build this package assuming you have
 following:
 
 ```shell
-$ dub build
+$ dub build -c app
+```
+
+You can then run the command-line tool:
+
+```shell
+$ ./build/phlogiston
 ```
 
 ## Assembler Usage

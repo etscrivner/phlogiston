@@ -1,5 +1,7 @@
 # Phlogiston
 
+[![DUB Package](https://img.shields.io/dub/v/phlogiston.svg)](https://code.dlang.org/packages/phlogiston)
+
 An assembler and disassembler for the Ethereum Virtual Machine (EVM).
 
 ## Building

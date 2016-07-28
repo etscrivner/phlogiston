@@ -3,7 +3,7 @@
 	"authors": [
 		"Eric Scrivner"
 	],
-	"description": "Ethereum Virtual Machine (EVM) assembly language tools.",
+	"description": "Ethereum Virtual Machine (EVM) assembler / disassembler.",
 	"copyright": "Copyright © 2016, Eric Scrivner",
 	"license": "MIT"
 }

@@ -26,15 +26,29 @@ Eric Scrivner<br><br>
 <dd>Converts a token stream from a scanner into EVM bytecode.<br><br>
 <b>Examples:</b><br>
 <pre class="d_code">
-<font color=blue>auto</font> scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"ADD"</font>);
+<font color=green>// Simple single opcode
+</font><font color=blue>auto</font> scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"ADD"</font>);
 <font color=blue>auto</font> parser = <font color=blue>new</font> <u>Parser</u>();
 <font color=blue>auto</font> bytecode = parser.parse(scanner);
-
 <font color=blue>assert</font>(bytecode == [0x01]);
 
-scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH1 0xfa\nPUSH1 0xab"</font>);
+<font color=green>// Multiple opcodes
+</font>scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH1 0xfa\nPUSH1 0xab"</font>);
 bytecode = parser.parse(scanner);
-<font color=blue>assert</font>(bytecode == [0x60, 0xfa, 0x60, 0xab]);
+<font color=blue>assert</font>(bytecode == [Opcode.PUSH1, 0xfa, Opcode.PUSH1, 0xab]);
+
+<font color=green>// Mixed stack and push opcodes
+</font>scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"PUSH1 0xfa\nDUP1\nMUL\nPUSH1 0x60\n"</font>);
+bytecode = parser.parse(scanner);
+<font color=blue>assert</font>(bytecode == [Opcode.PUSH1, 0xfa,
+                    Opcode.DUP1,
+                    Opcode.MUL,
+                    Opcode.PUSH1, 0x60]);
+
+<font color=green>// Properly ignores all sorts of whitespace
+</font>scanner = <font color=blue>new</font> Scanner(<font color=blue>cast</font>(<font color=blue>ubyte</font>[])<font color=red>"  \r\nPUSH1\t0xfa\r\nDUP1\n\r\t    "</font>);
+bytecode = parser.parse(scanner);
+<font color=blue>assert</font>(bytecode == [Opcode.PUSH1, 0xfa, Opcode.DUP1]);
 </pre>
 <br><br>
 <dl><dt><big><a name="Parser.parse"></a>ubyte[] <u>parse</u>(ref Scanner <i>scanner</i>);

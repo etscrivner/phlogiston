@@ -8,15 +8,16 @@
     "copyright": "Copyright © 2016, Eric Scrivner",
     "license": "MIT",
     "targetType": "library",
+    "targetPath": "build",
+    "workingDirectory": "build",
     "configurations": [
         {
-            "name": "static_library",
-            "targetType": "library"
+            "name": "library"
         },
         {
             "name": "app",
             "targetType": "executable",
-            "versions": ["PhlogistonCli"]
+            "mainSourceFile": "app/main.d"
         }
     ]
 }

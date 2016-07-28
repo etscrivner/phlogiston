@@ -7,15 +7,14 @@
  * LICENSE.txt file.
  * Authors: Eric Scrivner
  */
-module phlogiston.phlogiston;
-
 import std.file;
 import std.stdio;
 
 import phlogiston.cli.assembler;
 import phlogiston.cli.disassembler;
 
-version(PhlogistonCli) {
+version(unittest) {
+} else {
     int main(string[] args) {
         if (args.length < 4) {
             writeln("Usage: phlogiston [assemble|disassemble] [INPUT] [OUTPUT]");

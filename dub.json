@@ -4,14 +4,7 @@
 	"Eric Scrivner"
     ],
     "description": "Ethereum Virtual Machine (EVM) assembler / disassembler.",
+    "homepage": "https://github.com/etscrivner/phlogiston",
     "copyright": "Copyright © 2016, Eric Scrivner",
-    "license": "MIT",
-    "targetType": "library",
-    "subPackages": [
-        {
-            "name": "app",
-            "description": "Program for assembling / disassembling EVM code.",
-            "targetType": "executable"
-        }
-    ]
+    "license": "MIT"
 }

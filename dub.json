@@ -6,20 +6,12 @@
     "description": "Ethereum Virtual Machine (EVM) assembler / disassembler.",
     "copyright": "Copyright © 2016, Eric Scrivner",
     "license": "MIT",
-    "dependencies": {
-        ":core": ">0.0.0"
-    },
+    "targetType": "library",
     "subPackages": [
         {
-            "name": "core",
-            "description": "Library for assembling / disassembling EVM code.",
-            "targetType": "library",
-            "sourcePaths": [
-                "source/assembler", "source/disassembler", "source/evm"
-            ],
-            "importPaths": [
-                "source/assembler", "source/disassembler", "source/evm"
-            ]
+            "name": "app",
+            "description": "Program for assembling / disassembling EVM code.",
+            "targetType": "executable"
         }
     ]
 }
